@@ -1,7 +1,6 @@
 package ru.dekart.prostock
 
 import com.google.gson.annotations.SerializedName
-import java.util.UUID
 
 data class SignInResponse(
     @SerializedName("Success")
@@ -11,5 +10,5 @@ data class SignInResponse(
     @SerializedName("FullName")
     val fullName: String,
     @SerializedName("Token")
-    val token: UUID
+    val token: String
 )

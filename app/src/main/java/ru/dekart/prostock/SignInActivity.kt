@@ -9,14 +9,11 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.http.Body
 
 class SignInActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -28,9 +25,23 @@ class SignInActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
+        val prefs = getSharedPreferences("app_prefs", MODE_PRIVATE)
+        prefs.edit().clear().apply()
+
         findViewById<Button>(R.id.sign_in_button).setOnClickListener {
-            val login = findViewById<EditText>(R.id.login_field).text.toString()
-            val password = findViewById<EditText>(R.id.password_field).text.toString().toInt()
+            val login = findViewById<EditText>(R.id.login_field).text.toString().trim()
+            if (login.isBlank()) {
+                findViewById<EditText>(R.id.login_field).error = "Введите логин"
+                return@setOnClickListener
+            }
+
+            val password = findViewById<EditText>(R.id.password_field).text.toString()
+            if (password.isBlank()) {
+                findViewById<EditText>(R.id.password_field).error = "Введите пароль"
+                return@setOnClickListener
+            }
+
             val service = Retrofit.Builder()
                 .baseUrl("https://procom.dekart.ru/")
                 .addConverterFactory(GsonConverterFactory.create())
@@ -41,9 +52,15 @@ class SignInActivity : AppCompatActivity() {
                         call: Call<SignInResponse?>,
                         response: Response<SignInResponse?>
                     ) {
-                        println(response.body())
-                        if (response.body()?.success == true) {
-                            startActivity(Intent(this@SignInActivity, MainActivity::class.java))
+                        if (response.body()!!.success) {
+                            prefs.edit()
+                                .putString("token", response.body()!!.token)
+                                .apply()
+
+                            startActivity(
+                                Intent(this@SignInActivity, MainActivity::class.java)
+                                    .putExtra("fullName", response.body()?.fullName)
+                            )
                         } else {
                             Toast.makeText(
                                 this@SignInActivity,
@@ -57,7 +74,11 @@ class SignInActivity : AppCompatActivity() {
                         call: Call<SignInResponse?>,
                         t: Throwable
                     ) {
-                        TODO("Not yet implemented")
+                        Toast.makeText(
+                            this@SignInActivity,
+                            "Ошибка подключения к серверу",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                 })
         }

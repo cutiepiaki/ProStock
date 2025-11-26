@@ -1,13 +1,12 @@
 package ru.dekart.prostock
 
 import android.os.Bundle
-import android.widget.EditText
+import android.widget.Button
+import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 
 
 class MainActivity : AppCompatActivity() {
@@ -21,6 +20,10 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
+        val prefs = getSharedPreferences("app_prefs", MODE_PRIVATE)
+        val token = prefs.getString("token", null)
+        findViewById<Button>(R.id.bup).text = token
+        findViewById<TextView>(R.id.full_name).text = intent.getStringExtra("fullName")
 
 
     }

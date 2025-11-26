@@ -6,5 +6,5 @@ data class SignInRequest(
     @SerializedName("Login")
     val login: String,
     @SerializedName("Password")
-    val password: Int
+    val password: String
 )
